@@ -7,6 +7,8 @@ import 'package:ui_kit/theme/colors.dart';
 /// Все стили основаны на шрифте Manrope.
 /// Использование централизованных стилей обеспечивает единообразие типографики во всем приложении.
 class AppTextStyles {
+  const AppTextStyles._();
+
   /// Возвращает стиль для заголовков первого уровня.
   ///
   /// Стандартный размер шрифта: 24.
@@ -112,6 +114,17 @@ class AppTextStyles {
   }) {
     return GoogleFonts.manrope(
       fontSize: 15,
+      fontWeight: fontWeight,
+      color: color,
+    );
+  }
+
+  static TextStyle captionRegular({
+    Color? color = AppColors.black,
+    FontWeight? fontWeight = FontWeight.w400,
+  }) {
+    return GoogleFonts.manrope(
+      fontSize: 14,
       fontWeight: fontWeight,
       color: color,
     );
