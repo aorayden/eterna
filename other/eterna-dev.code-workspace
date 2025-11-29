@@ -1,0 +1,13 @@
+{
+    "folders": [
+        {
+            "path": "../application"
+        },
+        {
+            "path": "../packages/data_service"
+        },
+        {
+            "path": "../packages/ui_kit"
+        }
+    ]
+}

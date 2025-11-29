@@ -1,0 +1,18 @@
+name: data_service
+description: "Provides CRUD operations of the Eterna mobile application."
+version: 1.0.0
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:

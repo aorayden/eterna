@@ -1,0 +1,23 @@
+# Подключаем официальные рекомендуемые правила для Flutter.
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # --- Стиль кода ---
+    # Использовать одинарные кавычки (как принято в Dart), а не двойные.
+    prefer_single_quotes: true
+
+    # --- Чистота и ошибки ---
+    # Предупреждать, если забыли await перед асинхронной функцией.
+    unawaited_futures: true
+    
+    # Избегать print() в продакшене (лучше использовать log или debugPrint).
+    avoid_print: true
+
+    # Требовать const везде, где это возможно (улучшает производительность Flutter).
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_literals_to_create_immutables: true
+
+    # Сортировка импортов (сначала dart, потом package, потом свои файлы).
+    directives_ordering: true
