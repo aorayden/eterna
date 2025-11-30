@@ -12,7 +12,7 @@ import 'package:ui_kit/theme/text_styles.dart';
 /// - Текст-подсказку ([hintText]).
 /// - Валидацию и отображение состояния ошибки.
 /// - Маскирование ввода (через [inputFormatter]).
-class Input extends StatefulWidget {
+class AppInput extends StatefulWidget {
   /// Заголовок, отображаемый над полем ввода.
   final String? labelText;
 
@@ -38,7 +38,7 @@ class Input extends StatefulWidget {
   /// Режим автоматической валидации (например, при взаимодействии с пользователем).
   final AutovalidateMode autovalidateMode;
 
-  const Input({
+  const AppInput({
     this.labelText,
     this.hintText,
     this.errorText,
@@ -49,10 +49,10 @@ class Input extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => _InputState();
+  State<StatefulWidget> createState() => _AppInputState();
 }
 
-class _InputState extends State<Input> {
+class _AppInputState extends State<AppInput> {
   /// Форматтер для маскирования ввода (например, для телефонов или карт).
   MaskTextInputFormatter? _maskTextInputFormatter;
 

@@ -7,20 +7,20 @@ import 'package:ui_kit/theme/text_styles.dart';
 ///
 /// Представляет собой стилизованное текстовое поле с иконкой поиска слева (prefix) ..
 /// .. и кнопкой очистки справа (suffix), которая появляется только при фокусе.
-class Search extends StatefulWidget {
+class AppSearch extends StatefulWidget {
   /// Текст-подсказка, отображаемый, когда поле пустое.
   final String? hintText;
 
   /// Колбэк, вызываемый при каждом изменении текста в поле.
   final ValueChanged<String> onChanged;
 
-  const Search({this.hintText, required this.onChanged, super.key});
+  const AppSearch({this.hintText, required this.onChanged, super.key});
 
   @override
-  State<StatefulWidget> createState() => _SearchState();
+  State<StatefulWidget> createState() => _AppSearchState();
 }
 
-class _SearchState extends State<Search> {
+class _AppSearchState extends State<AppSearch> {
   /// Контроллер для управления текстом в поле ввода.
   late final TextEditingController _controller;
 
