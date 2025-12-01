@@ -148,6 +148,11 @@ class _AppInputState extends State<AppInput> {
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(color: borderColor, width: 1.2),
                 ),
+                // Граница в включённом состоянии.
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: borderColor, width: 1.2),
+                ),
                 // Граница при фокусе.
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),

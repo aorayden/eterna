@@ -76,6 +76,14 @@ class _AppSearchState extends State<AppSearch> {
             width: 1.2,
           ),
         ),
+        // Граница в включённом состоянии.
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+            color: AppColors.inputStroke,
+            width: 1.2,
+          ),
+        ),
         // Граница при фокусе.
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
