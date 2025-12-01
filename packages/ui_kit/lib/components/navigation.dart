@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:ui_kit/theme/colors.dart';
 import 'package:ui_kit/theme/icons.dart';
+import 'package:ui_kit/theme/text_styles.dart';
 
-//! TODO: исправить цвета и стили, задокументировать виджет.
-class Navigation extends StatefulWidget {
+class AppNavigation extends StatefulWidget {
   final int initialIndex;
   final ValueChanged<int> onItemSelected;
 
-  const Navigation({
+  const AppNavigation({
     super.key,
     this.initialIndex = 0,
     required this.onItemSelected,
   });
 
   @override
-  State<Navigation> createState() => _NavigationState();
+  State<AppNavigation> createState() => _AppNavigationState();
 }
 
-class _NavigationState extends State<Navigation> {
+class _AppNavigationState extends State<AppNavigation> {
   late int _selectedIndex;
 
   @override
@@ -35,27 +35,32 @@ class _NavigationState extends State<Navigation> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.inputBackground,
-        border: Border.all(color: const Color(0xFF202020).withAlpha(10)),
+        border: Border(top: BorderSide(color: AppColors.divider, width: 1.2)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(_items.length, (index) {
-          final item = _items[index];
-          final isSelected = index == _selectedIndex;
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 60,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(_items.length, (index) {
+              final item = _items[index];
+              final isSelected = index == _selectedIndex;
 
-          return _buildItem(
-            icon: item['icon'],
-            label: item['label'],
-            isSelected: isSelected,
-            onTap: () {
-              setState(() => _selectedIndex = index);
-              widget.onItemSelected(index);
-            },
-          );
-        }),
+              return _buildItem(
+                icon: item['icon'],
+                label: item['label'],
+                isSelected: isSelected,
+                onTap: () {
+                  setState(() => _selectedIndex = index);
+                  widget.onItemSelected(index);
+                },
+              );
+            }),
+          ),
+        ),
       ),
     );
   }
@@ -71,20 +76,23 @@ class _NavigationState extends State<Navigation> {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+      child: SizedBox(
+        width: 80,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: Icon(icon, color: color, size: 28),
             ),
-          ),
-        ],
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: AppTextStyles.textRegular(color: color, height: 1.33),
+            ),
+          ],
+        ),
       ),
     );
   }

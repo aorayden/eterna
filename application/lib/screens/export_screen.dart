@@ -1,17 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:data_service/artwork_service.dart';
+import 'package:data_service/models/artwork_model.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart'; // <--- Импорт Share Plus
+import 'package:share_plus/share_plus.dart';
 import 'package:ui_kit/components/button.dart';
 import 'package:ui_kit/components/input.dart';
-import 'package:ui_kit/components/select.dart';
 import 'package:ui_kit/components/notification.dart';
+import 'package:ui_kit/components/select.dart';
 import 'package:ui_kit/models/button_enums.dart';
 import 'package:ui_kit/models/select_item.dart';
-import 'package:data_service/models/artwork_model.dart';
-import 'package:data_service/artwork_service.dart';
+import 'package:ui_kit/theme/colors.dart';
+import 'package:ui_kit/theme/text_styles.dart';
 
 class ExportScreen extends StatefulWidget {
   const ExportScreen({super.key});
@@ -21,7 +23,6 @@ class ExportScreen extends StatefulWidget {
 }
 
 class _ExportScreenState extends State<ExportScreen> {
-  // Контроллеры для дат (убедитесь, что AppInput поддерживает их)
   final TextEditingController _dateStartController = TextEditingController();
   final TextEditingController _dateEndController = TextEditingController();
 
@@ -42,7 +43,6 @@ class _ExportScreenState extends State<ExportScreen> {
     super.dispose();
   }
 
-  /// Парсинг даты (DD.MM.YYYY)
   DateTime? _parseDate(String dateStr) {
     try {
       if (dateStr.isEmpty) return null;
@@ -58,9 +58,7 @@ class _ExportScreenState extends State<ExportScreen> {
     }
   }
 
-  /// Логика экспорта и шаринга
   Future<void> _handleExport({required bool exportAll}) async {
-    // 1. Получаем данные
     final allArtworks = ArtworkService.instance.artworksNotifier.value;
 
     if (allArtworks.isEmpty) {
@@ -70,7 +68,6 @@ class _ExportScreenState extends State<ExportScreen> {
 
     List<ArtworkModel> filteredList = [];
 
-    // 2. Фильтрация
     if (exportAll) {
       filteredList = List.from(allArtworks);
     } else {
@@ -79,16 +76,15 @@ class _ExportScreenState extends State<ExportScreen> {
       final String genreFilter = _selectedGenre ?? 'all';
 
       filteredList = allArtworks.where((item) {
-        // Проверка жанра
         if (genreFilter != 'all' && item.genre != genreFilter) {
           return false;
         }
 
-        // Проверка даты (парсим дату из модели)
         final itemDate = _parseDate(item.yearStart);
         if (itemDate != null) {
-          if (filterStart != null && itemDate.isBefore(filterStart))
+          if (filterStart != null && itemDate.isBefore(filterStart)) {
             return false;
+          }
           if (filterEnd != null && itemDate.isAfter(filterEnd)) return false;
         }
 
@@ -101,28 +97,22 @@ class _ExportScreenState extends State<ExportScreen> {
       return;
     }
 
-    // 3. Генерация файла и Шаринг
     try {
-      // Превращаем в JSON строку с отступами (для красоты)
       const JsonEncoder encoder = JsonEncoder.withIndent('  ');
       final String jsonString = encoder.convert(
         filteredList.map((e) => e.toJson()).toList(),
       );
 
-      // Получаем временную директорию
       final tempDir = await getTemporaryDirectory();
       final String fileName = exportAll
           ? 'full_export.json'
           : 'filtered_export.json';
       final File file = File('${tempDir.path}/$fileName');
 
-      // Записываем файл
       await file.writeAsString(jsonString);
 
       if (!mounted) return;
 
-      // --- ВЫЗОВ SHARE PLUS ---
-      // Открываем нативное окно "Поделиться"
       final result = await Share.shareXFiles(
         [XFile(file.path)],
         text: 'Экспорт произведений из приложения Eterna',
@@ -146,7 +136,6 @@ class _ExportScreenState extends State<ExportScreen> {
     const double verticalGap = 16.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -156,13 +145,10 @@ class _ExportScreenState extends State<ExportScreen> {
             children: [
               const SizedBox(height: 20),
 
-              const Text(
+              Text(
                 'Выгрузить произведения',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Manrope',
-                  color: Color(0xFF98989A),
+                style: AppTextStyles.firstTitle(
+                  color: AppColors.textSecondary,
                   height: 1.17,
                   letterSpacing: 0.08,
                 ),
@@ -170,18 +156,14 @@ class _ExportScreenState extends State<ExportScreen> {
 
               const SizedBox(height: 36),
 
-              // --- Селект "Жанр" ---
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8,
                 children: [
-                  const Text(
+                  Text(
                     'Жанр',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF8686A0),
+                    style: AppTextStyles.captionRegular(
+                      color: AppColors.inputLabel,
                     ),
                   ),
                   AppSelect(
@@ -196,13 +178,11 @@ class _ExportScreenState extends State<ExportScreen> {
 
               const SizedBox(height: verticalGap),
 
-              // --- Даты (Передаем контроллеры) ---
-              // ! Убедитесь, что в AppInput добавлен параметр controller
               AppInput(
                 labelText: 'Дата начала создания',
                 hintText: '--.--.----',
                 inputFormatter: '##.##.####',
-                // controller: _dateStartController, // <-- Раскомментировать
+                controller: _dateStartController,
               ),
 
               const SizedBox(height: verticalGap),
@@ -211,32 +191,28 @@ class _ExportScreenState extends State<ExportScreen> {
                 labelText: 'Дата окончания создания',
                 hintText: '--.--.----',
                 inputFormatter: '##.##.####',
-                // controller: _dateEndController, // <-- Раскомментировать
+                controller: _dateEndController,
               ),
 
               const SizedBox(height: 36),
 
               const Divider(
-                color: Color(0xFFE6E6E6),
+                color: AppColors.divider,
                 thickness: 1.2,
                 height: 1,
               ),
               const SizedBox(height: 13),
 
-              const Text(
+              Text(
                 'Моментальный экспорт',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Manrope',
-                  color: Color(0xFF98989A),
+                style: AppTextStyles.thirdTitleSemibold(
+                  color: AppColors.textSecondary,
                   height: 1.41,
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              // --- Кнопка "Экспортировать всё" ---
               AppButton(
                 text: 'Экспортировать всё',
                 kind: AppButtonKind.large,
@@ -246,7 +222,6 @@ class _ExportScreenState extends State<ExportScreen> {
 
               const SizedBox(height: 16),
 
-              // --- Кнопка "Экспортировать" (по фильтру) ---
               AppButton(
                 text: 'Экспортировать',
                 kind: AppButtonKind.large,

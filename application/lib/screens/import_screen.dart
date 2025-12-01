@@ -11,6 +11,8 @@ import 'package:ui_kit/components/notification.dart';
 import 'package:ui_kit/components/select.dart';
 import 'package:ui_kit/models/button_enums.dart';
 import 'package:ui_kit/models/select_item.dart';
+import 'package:ui_kit/theme/colors.dart';
+import 'package:ui_kit/theme/text_styles.dart';
 
 class ImportScreen extends StatefulWidget {
   const ImportScreen({super.key});
@@ -20,7 +22,6 @@ class ImportScreen extends StatefulWidget {
 }
 
 class _ImportScreenState extends State<ImportScreen> {
-  // Контроллеры для полей ввода
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _dateStartController = TextEditingController();
@@ -46,19 +47,16 @@ class _ImportScreenState extends State<ImportScreen> {
     super.dispose();
   }
 
-  /// Простая валидация формата даты DD.MM.YYYY
   bool _isValidDate(String date) {
     final regex = RegExp(r'^\d{2}\.\d{2}\.\d{4}$');
     return regex.hasMatch(date);
   }
 
-  /// Логика добавления вручную
   void _handleManualAdd() {
     final title = _titleController.text.trim();
     final dateStart = _dateStartController.text.trim();
     final dateEnd = _dateEndController.text.trim();
 
-    // 1. Валидация
     if (title.isEmpty) {
       AppNotification.show(context, message: 'Ошибка: Введите название');
       return;
@@ -67,7 +65,6 @@ class _ImportScreenState extends State<ImportScreen> {
       AppNotification.show(context, message: 'Ошибка: Выберите жанр');
       return;
     }
-    // Проверка дат, если они введены (не пустые)
     if (dateStart.isNotEmpty && !_isValidDate(dateStart)) {
       AppNotification.show(
         context,
@@ -83,7 +80,6 @@ class _ImportScreenState extends State<ImportScreen> {
       return;
     }
 
-    // 2. Создание модели
     final newArtwork = ArtworkModel(
       title: title,
       description: _descController.text.trim(),
@@ -92,48 +88,40 @@ class _ImportScreenState extends State<ImportScreen> {
       genre: _selectedGenre!,
       imageUrl: _coverController.text.trim().isNotEmpty
           ? _coverController.text.trim()
-          // Заглушка, если нет ссылки
           : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Shakespeare.jpg/800px-Shakespeare.jpg',
     );
 
-    // 3. Сохранение
     ArtworkService.instance.addArtwork(newArtwork);
 
-    // 4. Успех и очистка
     AppNotification.show(context, message: 'Произведение успешно добавлено!');
     _clearForm();
   }
 
-  /// Логика импорта из файла JSON
   Future<void> _handleFileImport() async {
     try {
-      // 1. Открываем выбор файла
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
 
-      if (result == null) return; // Пользователь отменил выбор
+      if (result == null) return;
 
       final file = File(result.files.single.path!);
       final content = await file.readAsString();
 
-      // 2. Парсим JSON
       final List<dynamic> jsonList = jsonDecode(content);
 
       int addedCount = 0;
 
       for (var item in jsonList) {
-        // Проверяем минимально необходимые поля
         if (item is Map<String, dynamic> &&
             item['title'] != null &&
             item['genre'] != null) {
-          ArtworkService.instance.addArtwork(ArtworkModel.fromJson(item));
+          await ArtworkService.instance.addArtwork(ArtworkModel.fromJson(item));
           addedCount++;
         }
       }
 
-      // 3. Результат
       if (addedCount > 0) {
         if (mounted) {
           AppNotification.show(
@@ -174,7 +162,7 @@ class _ImportScreenState extends State<ImportScreen> {
     const double verticalGap = 12.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.screenBackground,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -184,28 +172,23 @@ class _ImportScreenState extends State<ImportScreen> {
             children: [
               const SizedBox(height: 20),
 
-              const Text(
+              Text(
                 'Добавить произведение',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Manrope',
-                  color: Color(0xFF98989A),
+                style: AppTextStyles.firstTitle(
+                  color: AppColors.textSecondary,
                   height: 1.17,
                 ),
               ),
 
               const SizedBox(height: 36),
 
-              // 1. Название
               AppInput(
                 labelText: 'Название',
                 hintText: 'Введите название',
-                controller: _titleController, // Подключили контроллер
+                controller: _titleController,
               ),
               const SizedBox(height: verticalGap),
 
-              // 2. Описание
               AppInput(
                 labelText: 'Описание',
                 hintText: 'Введите описание',
@@ -213,7 +196,6 @@ class _ImportScreenState extends State<ImportScreen> {
               ),
               const SizedBox(height: verticalGap),
 
-              // 3. Дата начала
               AppInput(
                 labelText: 'Дата начала создания',
                 hintText: '--.--.----',
@@ -222,7 +204,6 @@ class _ImportScreenState extends State<ImportScreen> {
               ),
               const SizedBox(height: verticalGap),
 
-              // 4. Дата окончания
               AppInput(
                 labelText: 'Дата окончания создания',
                 hintText: '--.--.----',
@@ -231,18 +212,17 @@ class _ImportScreenState extends State<ImportScreen> {
               ),
               const SizedBox(height: verticalGap),
 
-              // 5. Жанр
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8,
                 children: [
-                  const Text(
+                  Text(
                     'Жанр',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Manrope',
-                      color: Color(0xFF8686A0),
-                    ),
+                    // Используем стиль CaptionRegular (14px), но переопределяем размер до 12px,
+                    // как было в исходном коде.
+                    style: AppTextStyles.captionRegular(
+                      color: AppColors.inputLabel,
+                    ).copyWith(fontSize: 12),
                   ),
                   AppSelect(
                     hintText: 'Выберите жанр',
@@ -259,7 +239,6 @@ class _ImportScreenState extends State<ImportScreen> {
 
               const SizedBox(height: verticalGap),
 
-              // 6. Обложка
               AppInput(
                 labelText: 'Обложка',
                 hintText: 'Введите ссылку',
@@ -269,42 +248,36 @@ class _ImportScreenState extends State<ImportScreen> {
               const SizedBox(height: 24),
 
               const Divider(
-                color: Color(0xFFE6E6E6),
+                color: AppColors.divider,
                 thickness: 1.2,
                 height: 1,
               ),
 
               const SizedBox(height: 13),
 
-              const Text(
+              Text(
                 'Добавить с помощью файла',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Manrope',
-                  color: Color(0xFF98989A),
+                style: AppTextStyles.thirdTitleSemibold(
+                  color: AppColors.textSecondary,
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              // --- Кнопка: Прикрепить файл ---
               AppButton(
                 text: 'Прикрепить файл (.json)',
                 kind: AppButtonKind.large,
                 variant: AppButtonVariant.outlined,
-                onPressed: _handleFileImport, // Вызов логики импорта
+                onPressed: _handleFileImport,
               ),
 
               const SizedBox(height: 16),
 
-              // --- Кнопка: Импортировать (Ручное добавление) ---
               AppButton(
                 text: 'Импортировать',
                 kind: AppButtonKind.large,
                 variant: AppButtonVariant.filled,
-                onPressed:
-                    _handleManualAdd, // Вызов логики валидации и сохранения
+                onPressed: _handleManualAdd,
               ),
 
               const SizedBox(height: 40),

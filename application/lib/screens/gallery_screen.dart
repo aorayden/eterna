@@ -1,10 +1,12 @@
-import 'package:data_service/artwork_service.dart'; // Импорт сервиса
-import 'package:data_service/models/artwork_model.dart'; // Импорт модели
+import 'package:data_service/artwork_service.dart';
+import 'package:data_service/models/artwork_model.dart';
 import 'package:flutter/material.dart';
 import 'package:ui_kit/components/button.dart';
 import 'package:ui_kit/components/card.dart';
 import 'package:ui_kit/components/search.dart';
 import 'package:ui_kit/models/button_enums.dart';
+import 'package:ui_kit/theme/colors.dart';
+import 'package:ui_kit/theme/text_styles.dart';
 
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
@@ -48,6 +50,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     const double verticalGap = 12.0;
 
     return Scaffold(
+      backgroundColor: AppColors.screenBackground,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -66,17 +69,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
             const SizedBox(height: verticalGap),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+              ),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Каталог произведений',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontFamily: 'Manrope',
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF98989A),
+                  style: AppTextStyles.thirdTitleSemibold(
+                    color: AppColors.textSecondary,
                     height: 1.41,
                   ),
                 ),
@@ -117,11 +119,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                       child: Text(
                         'Галерея пуста!\nЗаполните её в окне Импорта',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF8686A0).withValues(alpha: 0.6),
+                        style: AppTextStyles.headlineMedium(
+                          color: AppColors.inputLabel.withValues(alpha: 0.6),
                           height: 1.5,
                         ),
                       ),
@@ -145,11 +144,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                     return Center(
                       child: Text(
                         'Ничего не найдено',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF8686A0).withValues(alpha: 0.6),
+                        style: AppTextStyles.headlineMedium(
+                          color: AppColors.inputLabel.withValues(alpha: 0.6),
                         ),
                       ),
                     );
@@ -222,7 +218,7 @@ class ArtworkDetailsBottomSheet extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: Color(0xFFF6F6F6),
+        color: AppColors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
@@ -235,11 +231,8 @@ class ArtworkDetailsBottomSheet extends StatelessWidget {
         children: [
           Text(
             artwork.title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
+            style: AppTextStyles.secondTitleSemibold(
+              color: AppColors.black,
               height: 1.40,
               letterSpacing: 0.08,
             ),
@@ -261,13 +254,10 @@ class ArtworkDetailsBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Описание',
-            style: TextStyle(
-              color: Color(0xFF98989A),
-              fontSize: 16,
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w500,
+            style: AppTextStyles.headlineMedium(
+              color: AppColors.textSecondary,
               height: 1.25,
               letterSpacing: -0.05,
             ),
@@ -277,11 +267,8 @@ class ArtworkDetailsBottomSheet extends StatelessWidget {
             artwork.description.isNotEmpty
                 ? artwork.description
                 : 'Описание отсутствует',
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 15,
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w400,
+            style: AppTextStyles.textRegular(
+              color: AppColors.black,
               height: 1.33,
             ),
           ),
@@ -289,11 +276,8 @@ class ArtworkDetailsBottomSheet extends StatelessWidget {
 
           Text(
             'Дата: $dateString',
-            style: const TextStyle(
-              color: Color(0xFF98989A),
-              fontSize: 16,
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w500,
+            style: AppTextStyles.headlineMedium(
+              color: AppColors.textSecondary,
               height: 1.25,
               letterSpacing: -0.05,
             ),

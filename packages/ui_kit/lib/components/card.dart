@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:ui_kit/theme/colors.dart';
+import 'package:ui_kit/theme/text_styles.dart';
 
-//! TODO: исправить цвета и стили, задокументировать виджет.
-class Card extends StatelessWidget {
+class AppCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String imageUrl;
   final VoidCallback? onTap;
 
-  const Card({
+  const AppCard({
     super.key,
     required this.title,
     required this.subtitle,
@@ -21,58 +22,54 @@ class Card extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 180,
+        height: 152,
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(15),
           image: DecorationImage(
             image: NetworkImage(imageUrl),
             fit: BoxFit.cover,
           ),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.1),
-                Colors.black.withValues(alpha: 0.6),
-              ],
-              stops: const [0.4, 1.0],
+        child: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.black.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(15),
+              ),
             ),
-          ),
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(),
 
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  height: 1.2,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.secondTitleExtraBold(
+                      color: AppColors.white,
+                      height: 1.40,
+                      letterSpacing: 0.08,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.secondTitleExtraBold(
+                      color: AppColors.white,
+                      height: 1.40,
+                      letterSpacing: 0.08,
+                    ),
+                  ),
+                ],
               ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
