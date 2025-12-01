@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ui_kit/models/button_enums.dart';
 import 'package:ui_kit/theme/colors.dart';
 
+//! TODO: исправить цвета и задокументировать виджет.
 class AppButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -57,11 +58,9 @@ class AppButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.accent,
             foregroundColor: AppColors.white,
-            // Цвет фона для состояния Disabled (когда onPressed == null)
             disabledBackgroundColor: AppColors.accentInactive,
-            // Цвет текста для состояния Disabled
             disabledForegroundColor: AppColors.white,
-            elevation: 0, // Плоский дизайн без тени.
+            elevation: 0,
             shape: shape,
             padding: padding,
           ),
@@ -74,7 +73,6 @@ class AppButton extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.accent,
             side: const BorderSide(color: AppColors.accentInactive),
-            // Стандартный серый цвет для disabled состояния в Outlined
             disabledForegroundColor: Colors.grey,
             backgroundColor: Colors.transparent,
             shape: shape,
@@ -89,9 +87,8 @@ class AppButton extends StatelessWidget {
           style: TextButton.styleFrom(
             backgroundColor: AppColors.accent,
             foregroundColor: AppColors.white,
-            // Полупрозрачный фон для disabled ghost.
-            disabledBackgroundColor: AppColors.accent.withOpacity(0.5),
-            disabledForegroundColor: Colors.grey.withOpacity(0.5),
+            disabledBackgroundColor: AppColors.accent.withValues(alpha: 0.5),
+            disabledForegroundColor: Colors.grey.withValues(alpha: 0.5),
             shape: shape,
             padding: padding,
           ),
@@ -100,7 +97,6 @@ class AppButton extends StatelessWidget {
     }
   }
 
-  /// Возвращает высоту кнопки в зависимости от её вида.
   double _getHeight() {
     switch (kind) {
       case AppButtonKind.large:
@@ -112,7 +108,6 @@ class AppButton extends StatelessWidget {
     }
   }
 
-  /// Возвращает размер шрифта в зависимости от вида кнопки.
   double _getFontSize() {
     switch (kind) {
       case AppButtonKind.large:
@@ -124,7 +119,6 @@ class AppButton extends StatelessWidget {
     }
   }
 
-  /// Возвращает внутренние отступы в зависимости от вида кнопки.
   EdgeInsets _getPadding() {
     switch (kind) {
       case AppButtonKind.large:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ui_kit/theme/colors.dart';
 import 'package:ui_kit/theme/icons.dart';
 
+//! TODO: исправить цвета и стили, задокументировать виджет.
 class Navigation extends StatefulWidget {
   final int initialIndex;
   final ValueChanged<int> onItemSelected;

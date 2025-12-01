@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//! TODO: исправить цвета и стили, задокументировать виджет.
 class Card extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -19,18 +20,15 @@ class Card extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: double.infinity, // Или фиксированная ширина, например 300
-        height: 180, // Высота карточки как на макете
+        width: double.infinity,
+        height: 180,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20), // Сильное скругление углов
+          borderRadius: BorderRadius.circular(20),
           image: DecorationImage(
-            image: NetworkImage(imageUrl), // Или AssetImage для локальных фото
-            fit: BoxFit.cover, // Картинка заполняет весь контейнер
+            image: NetworkImage(imageUrl),
+            fit: BoxFit.cover,
           ),
         ),
-        // ClipRRect нужен, если мы хотим добавить эффект нажатия (InkWell) поверх,
-        // но здесь мы просто используем Container.
-        // Чтобы текст читался, добавим градиент поверх картинки.
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
@@ -38,27 +36,18 @@ class Card extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(
-                  0.1,
-                ), // Сверху чуть темнее (или прозрачно)
-                Colors.black.withOpacity(
-                  0.6,
-                ), // Снизу темнее для читаемости текста
+                Colors.black.withValues(alpha: 0.1),
+                Colors.black.withValues(alpha: 0.6),
               ],
-              stops: const [0.4, 1.0], // Градиент начинается с середины
+              stops: const [0.4, 1.0],
             ),
           ),
           padding: const EdgeInsets.all(20.0),
           child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.end, // Текст прижат к низу, но...
+            mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // На макете текст распределен: заголовок выше, дата ниже.
-              // Используем Spacer или MainAxisAlignment.spaceBetween, если нужно разнести их.
-              // Но на фото они выглядят как единый блок внизу-слева.
-              // Если текст по центру слева, то меняем MainAxisAlignment.
-              const Spacer(), // Толкает контент вниз, если нужно
+              const Spacer(),
 
               Text(
                 title,
@@ -66,20 +55,20 @@ class Card extends StatelessWidget {
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  height: 1.2, // Межстрочный интервал
+                  height: 1.2,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
 
-              const SizedBox(height: 8), // Отступ между заголовком и датой
+              const SizedBox(height: 8),
 
               Text(
                 subtitle,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
-                  fontWeight: FontWeight.bold, // На макете год тоже жирный
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],

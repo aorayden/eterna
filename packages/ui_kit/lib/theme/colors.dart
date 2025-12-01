@@ -44,4 +44,7 @@ abstract class AppColors {
 
   /// Цвет для вторичного текста, описаний и подписей.
   static const Color description = Color(0xFF8787A1);
+
+  /// Цвет для заднего фона окон.
+  static const Color screenBackground = Color(0xFFFFFFFF);
 }
