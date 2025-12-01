@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  
+  ui_kit:
+    path: ../packages/ui_kit
 
 dev_dependencies:
   flutter_test:
