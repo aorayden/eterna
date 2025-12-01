@@ -1,0 +1,22 @@
+name: preview
+description: "An application for previewing the UI Kit and data transfer service."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  logger: ^2.6.2
+
+  ui_kit:
+    path: ../packages/ui_kit
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:

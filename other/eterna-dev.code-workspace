@@ -1,12 +1,19 @@
 {
     "folders": [
         {
+            "name": "application",
             "path": "../application"
         },
         {
+            "name": "preview",
+            "path": "../preview"
+        },
+        {
+            "name": "data_service",
             "path": "../packages/data_service"
         },
         {
+            "name": "ui_kit",
             "path": "../packages/ui_kit"
         }
     ]
