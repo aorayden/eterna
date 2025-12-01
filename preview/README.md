@@ -1,1 +1,0 @@
-### An application for previewing the UI Kit and data transfer service
