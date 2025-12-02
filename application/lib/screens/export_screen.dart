@@ -43,19 +43,32 @@ class _ExportScreenState extends State<ExportScreen> {
     super.dispose();
   }
 
-  DateTime? _parseDate(String dateStr) {
+  // Проверка формата через Regex
+  bool _isFormatValid(String date) {
+    final regex = RegExp(r'^\d{2}\.\d{2}\.\d{4}$');
+    return regex.hasMatch(date);
+  }
+
+  // Строгий парсинг даты
+  DateTime? _parseDateStrict(String dateStr) {
+    if (!_isFormatValid(dateStr)) return null;
+
     try {
-      if (dateStr.isEmpty) return null;
       final parts = dateStr.split('.');
-      if (parts.length != 3) return null;
-      return DateTime(
-        int.parse(parts[2]),
-        int.parse(parts[1]),
-        int.parse(parts[0]),
-      );
+      final day = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final year = int.parse(parts[2]);
+
+      final date = DateTime(year, month, day);
+
+      // Проверка на календарную корректность (например, 30 февраля)
+      if (date.year == year && date.month == month && date.day == day) {
+        return date;
+      }
     } catch (e) {
       return null;
     }
+    return null;
   }
 
   Future<void> _handleExport({required bool exportAll}) async {
@@ -71,21 +84,75 @@ class _ExportScreenState extends State<ExportScreen> {
     if (exportAll) {
       filteredList = List.from(allArtworks);
     } else {
-      final DateTime? filterStart = _parseDate(_dateStartController.text);
-      final DateTime? filterEnd = _parseDate(_dateEndController.text);
+      // --- Блок валидации ---
+      final startStr = _dateStartController.text.trim();
+      final endStr = _dateEndController.text.trim();
+
+      DateTime? filterStart;
+      DateTime? filterEnd;
+
+      // 1. Проверяем дату начала, только если она введена
+      if (startStr.isNotEmpty) {
+        filterStart = _parseDateStrict(startStr);
+        if (filterStart == null) {
+          AppNotification.show(
+            context,
+            message: 'Ошибка: Некорректная дата начала (ДД.ММ.ГГГГ)',
+          );
+          return;
+        }
+      }
+
+      // 2. Проверяем дату конца, только если она введена
+      if (endStr.isNotEmpty) {
+        filterEnd = _parseDateStrict(endStr);
+        if (filterEnd == null) {
+          AppNotification.show(
+            context,
+            message: 'Ошибка: Некорректная дата окончания (ДД.ММ.ГГГГ)',
+          );
+          return;
+        }
+      }
+
+      // 3. Проверяем логику: Начало <= Конец
+      if (filterStart != null && filterEnd != null) {
+        if (filterStart.isAfter(filterEnd)) {
+          AppNotification.show(
+            context,
+            message: 'Ошибка: Дата начала не может быть позже даты окончания',
+          );
+          return;
+        }
+      }
+      // ---------------------
+
       final String genreFilter = _selectedGenre ?? 'all';
 
       filteredList = allArtworks.where((item) {
+        // Фильтр по жанру
         if (genreFilter != 'all' && item.genre != genreFilter) {
           return false;
         }
 
-        final itemDate = _parseDate(item.yearStart);
+        // Фильтр по дате
+        // Сначала парсим дату самого произведения
+        final itemDate = _parseDateStrict(item.yearStart);
+
+        // Если у произведения дата некорректна, решаем, включать ли его.
+        // Обычно, если мы фильтруем по датам, произведения без дат или с битыми датами исключаются.
         if (itemDate != null) {
           if (filterStart != null && itemDate.isBefore(filterStart)) {
             return false;
           }
-          if (filterEnd != null && itemDate.isAfter(filterEnd)) return false;
+          if (filterEnd != null && itemDate.isAfter(filterEnd)) {
+            return false;
+          }
+        } else {
+          // Если фильтры дат установлены, а у произведения даты нет - исключаем его
+          if (filterStart != null || filterEnd != null) {
+            return false;
+          }
         }
 
         return true;
@@ -116,7 +183,7 @@ class _ExportScreenState extends State<ExportScreen> {
       final result = await Share.shareXFiles(
         [XFile(file.path)],
         text: 'Экспорт произведений из приложения Eterna',
-        subject: 'Экспорт базы данных', // Тема письма (для email)
+        subject: 'Экспорт базы данных',
       );
 
       if (result.status == ShareResultStatus.success) {
@@ -136,6 +203,8 @@ class _ExportScreenState extends State<ExportScreen> {
     const double verticalGap = 16.0;
 
     return Scaffold(
+      backgroundColor:
+          AppColors.screenBackground, // Убедитесь, что цвет фона задан
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -180,8 +249,9 @@ class _ExportScreenState extends State<ExportScreen> {
 
               AppInput(
                 labelText: 'Дата начала создания',
-                hintText: '--.--.----',
+                hintText: 'ДД.ММ.ГГГГ',
                 inputFormatter: '##.##.####',
+                keyboardType: TextInputType.number,
                 controller: _dateStartController,
               ),
 
@@ -189,8 +259,9 @@ class _ExportScreenState extends State<ExportScreen> {
 
               AppInput(
                 labelText: 'Дата окончания создания',
-                hintText: '--.--.----',
+                hintText: 'ДД.ММ.ГГГГ',
                 inputFormatter: '##.##.####',
+                keyboardType: TextInputType.number,
                 controller: _dateEndController,
               ),
 

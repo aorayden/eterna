@@ -28,6 +28,9 @@ class _ImportScreenState extends State<ImportScreen> {
   final _dateEndController = TextEditingController();
   final _coverController = TextEditingController();
 
+  final String _defaultCover =
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Shakespeare.jpg/800px-Shakespeare.jpg';
+
   String? _selectedGenre;
 
   final List<SelectItem> _genres = const [
@@ -36,6 +39,14 @@ class _ImportScreenState extends State<ImportScreen> {
     SelectItem(value: 'photo', text: 'Фотография'),
     SelectItem(value: 'graphics', text: 'Графика'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _coverController.addListener(() {
+      setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -47,16 +58,46 @@ class _ImportScreenState extends State<ImportScreen> {
     super.dispose();
   }
 
-  bool _isValidDate(String date) {
+  // Проверка формата через Regex (базовая)
+  bool _isFormatValid(String date) {
     final regex = RegExp(r'^\d{2}\.\d{2}\.\d{4}$');
     return regex.hasMatch(date);
   }
 
+  // Парсинг строки "ДД.ММ.ГГГГ" в DateTime с проверкой календарной корректности
+  DateTime? _parseDate(String dateStr) {
+    if (!_isFormatValid(dateStr)) return null;
+
+    try {
+      final parts = dateStr.split('.');
+      final day = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final year = int.parse(parts[2]);
+
+      final date = DateTime(year, month, day);
+
+      // Dart автоматически переносит дни (например, 32 января станет 1 февраля).
+      // Нам это не нужно, мы хотим строгую валидацию.
+      if (date.year == year && date.month == month && date.day == day) {
+        return date;
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
+
+  bool _isValidUrl(String url) {
+    return Uri.tryParse(url)?.hasAbsolutePath ?? false;
+  }
+
   void _handleManualAdd() {
     final title = _titleController.text.trim();
-    final dateStart = _dateStartController.text.trim();
-    final dateEnd = _dateEndController.text.trim();
+    final dateStartStr = _dateStartController.text.trim();
+    final dateEndStr = _dateEndController.text.trim();
+    final coverUrl = _coverController.text.trim();
 
+    // 1. Проверка обязательных полей
     if (title.isEmpty) {
       AppNotification.show(context, message: 'Ошибка: Введите название');
       return;
@@ -65,30 +106,61 @@ class _ImportScreenState extends State<ImportScreen> {
       AppNotification.show(context, message: 'Ошибка: Выберите жанр');
       return;
     }
-    if (dateStart.isNotEmpty && !_isValidDate(dateStart)) {
-      AppNotification.show(
-        context,
-        message: 'Ошибка: Неверный формат даты начала (ДД.ММ.ГГГГ)',
-      );
-      return;
+
+    // 2. Парсинг и проверка дат
+    DateTime? startDate;
+    DateTime? endDate;
+
+    if (dateStartStr.isNotEmpty) {
+      startDate = _parseDate(dateStartStr);
+      if (startDate == null) {
+        AppNotification.show(
+          context,
+          message: 'Ошибка: Некорректная дата начала (например, 30.02.2023)',
+        );
+        return;
+      }
     }
-    if (dateEnd.isNotEmpty && !_isValidDate(dateEnd)) {
+
+    if (dateEndStr.isNotEmpty) {
+      endDate = _parseDate(dateEndStr);
+      if (endDate == null) {
+        AppNotification.show(
+          context,
+          message: 'Ошибка: Некорректная дата окончания',
+        );
+        return;
+      }
+    }
+
+    // 3. Логическое сравнение дат
+    if (startDate != null && endDate != null) {
+      if (startDate.isAfter(endDate)) {
+        AppNotification.show(
+          context,
+          message: 'Ошибка: Дата начала не может быть позже даты окончания',
+        );
+        return;
+      }
+    }
+
+    // 4. Проверка обложки
+    if (coverUrl.isNotEmpty && !_isValidUrl(coverUrl)) {
       AppNotification.show(
         context,
-        message: 'Ошибка: Неверный формат даты окончания',
+        message: 'Ошибка: Некорректная ссылка на изображение',
       );
       return;
     }
 
+    // Сохранение
     final newArtwork = ArtworkModel(
       title: title,
       description: _descController.text.trim(),
-      yearStart: dateStart,
-      yearEnd: dateEnd,
+      yearStart: dateStartStr,
+      yearEnd: dateEndStr,
       genre: _selectedGenre!,
-      imageUrl: _coverController.text.trim().isNotEmpty
-          ? _coverController.text.trim()
-          : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Shakespeare.jpg/800px-Shakespeare.jpg',
+      imageUrl: coverUrl.isNotEmpty ? coverUrl : _defaultCover,
     );
 
     ArtworkService.instance.addArtwork(newArtwork);
@@ -108,7 +180,6 @@ class _ImportScreenState extends State<ImportScreen> {
 
       final file = File(result.files.single.path!);
       final content = await file.readAsString();
-
       final List<dynamic> jsonList = jsonDecode(content);
 
       int addedCount = 0;
@@ -122,15 +193,13 @@ class _ImportScreenState extends State<ImportScreen> {
         }
       }
 
-      if (addedCount > 0) {
-        if (mounted) {
+      if (mounted) {
+        if (addedCount > 0) {
           AppNotification.show(
             context,
             message: 'Импортировано $addedCount произведений!',
           );
-        }
-      } else {
-        if (mounted) {
+        } else {
           AppNotification.show(
             context,
             message: 'Файл не содержит корректных данных',
@@ -160,6 +229,7 @@ class _ImportScreenState extends State<ImportScreen> {
   Widget build(BuildContext context) {
     const double horizontalPadding = 28.0;
     const double verticalGap = 12.0;
+    final String currentCoverUrl = _coverController.text.trim();
 
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
@@ -171,7 +241,6 @@ class _ImportScreenState extends State<ImportScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-
               Text(
                 'Добавить произведение',
                 style: AppTextStyles.firstTitle(
@@ -179,47 +248,41 @@ class _ImportScreenState extends State<ImportScreen> {
                   height: 1.17,
                 ),
               ),
-
               const SizedBox(height: 36),
-
               AppInput(
                 labelText: 'Название',
                 hintText: 'Введите название',
                 controller: _titleController,
               ),
               const SizedBox(height: verticalGap),
-
               AppInput(
                 labelText: 'Описание',
                 hintText: 'Введите описание',
                 controller: _descController,
               ),
               const SizedBox(height: verticalGap),
-
               AppInput(
                 labelText: 'Дата начала создания',
-                hintText: '--.--.----',
+                hintText: 'ДД.ММ.ГГГГ',
                 inputFormatter: '##.##.####',
+                keyboardType: TextInputType.number, // Удобно для цифр
                 controller: _dateStartController,
               ),
               const SizedBox(height: verticalGap),
-
               AppInput(
                 labelText: 'Дата окончания создания',
-                hintText: '--.--.----',
+                hintText: 'ДД.ММ.ГГГГ',
                 inputFormatter: '##.##.####',
+                keyboardType: TextInputType.number,
                 controller: _dateEndController,
               ),
               const SizedBox(height: verticalGap),
-
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8,
                 children: [
                   Text(
                     'Жанр',
-                    // Используем стиль CaptionRegular (14px), но переопределяем размер до 12px,
-                    // как было в исходном коде.
                     style: AppTextStyles.captionRegular(
                       color: AppColors.inputLabel,
                     ).copyWith(fontSize: 12),
@@ -236,50 +299,84 @@ class _ImportScreenState extends State<ImportScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: verticalGap),
-
               AppInput(
-                labelText: 'Обложка',
-                hintText: 'Введите ссылку',
+                labelText: 'Ссылка на обложку',
+                hintText: 'https://example.com/image.jpg',
                 controller: _coverController,
               ),
 
-              const SizedBox(height: 24),
+              // --- Предпросмотр ---
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                child: currentCoverUrl.isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 12.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            height: 200,
+                            width: double.infinity,
+                            color: Colors.grey[200],
+                            child: Image.network(
+                              currentCoverUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.broken_image,
+                                        color: Colors.grey,
+                                        size: 40,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Не удалось загрузить',
+                                        style: AppTextStyles.captionRegular(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
 
+              // -------------------
+              const SizedBox(height: 24),
               const Divider(
                 color: AppColors.divider,
                 thickness: 1.2,
                 height: 1,
               ),
-
               const SizedBox(height: 13),
-
               Text(
                 'Добавить с помощью файла',
                 style: AppTextStyles.thirdTitleSemibold(
                   color: AppColors.textSecondary,
                 ),
               ),
-
               const SizedBox(height: 16),
-
               AppButton(
                 text: 'Прикрепить файл (.json)',
                 kind: AppButtonKind.large,
                 variant: AppButtonVariant.outlined,
                 onPressed: _handleFileImport,
               ),
-
               const SizedBox(height: 16),
-
               AppButton(
                 text: 'Импортировать',
                 kind: AppButtonKind.large,
                 variant: AppButtonVariant.filled,
                 onPressed: _handleManualAdd,
               ),
-
               const SizedBox(height: 40),
             ],
           ),
