@@ -16,7 +16,6 @@ class ArtworkModel {
         'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/800px-1665_Girl_with_a_Pearl_Earring.jpg',
   });
 
-  // Превращаем объект в Map (JSON)
   Map<String, dynamic> toJson() {
     return {
       'title': title,
@@ -28,7 +27,6 @@ class ArtworkModel {
     };
   }
 
-  // Создаем объект из Map (JSON)
   factory ArtworkModel.fromJson(Map<String, dynamic> json) {
     return ArtworkModel(
       title: json['title'] ?? '',

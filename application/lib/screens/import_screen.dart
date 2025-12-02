@@ -58,13 +58,11 @@ class _ImportScreenState extends State<ImportScreen> {
     super.dispose();
   }
 
-  // Проверка формата через Regex (базовая)
   bool _isFormatValid(String date) {
     final regex = RegExp(r'^\d{2}\.\d{2}\.\d{4}$');
     return regex.hasMatch(date);
   }
 
-  // Парсинг строки "ДД.ММ.ГГГГ" в DateTime с проверкой календарной корректности
   DateTime? _parseDate(String dateStr) {
     if (!_isFormatValid(dateStr)) return null;
 
@@ -76,8 +74,6 @@ class _ImportScreenState extends State<ImportScreen> {
 
       final date = DateTime(year, month, day);
 
-      // Dart автоматически переносит дни (например, 32 января станет 1 февраля).
-      // Нам это не нужно, мы хотим строгую валидацию.
       if (date.year == year && date.month == month && date.day == day) {
         return date;
       }
@@ -97,7 +93,6 @@ class _ImportScreenState extends State<ImportScreen> {
     final dateEndStr = _dateEndController.text.trim();
     final coverUrl = _coverController.text.trim();
 
-    // 1. Проверка обязательных полей
     if (title.isEmpty) {
       AppNotification.show(context, message: 'Ошибка: Введите название');
       return;
@@ -107,7 +102,6 @@ class _ImportScreenState extends State<ImportScreen> {
       return;
     }
 
-    // 2. Парсинг и проверка дат
     DateTime? startDate;
     DateTime? endDate;
 
@@ -133,7 +127,6 @@ class _ImportScreenState extends State<ImportScreen> {
       }
     }
 
-    // 3. Логическое сравнение дат
     if (startDate != null && endDate != null) {
       if (startDate.isAfter(endDate)) {
         AppNotification.show(
@@ -144,7 +137,6 @@ class _ImportScreenState extends State<ImportScreen> {
       }
     }
 
-    // 4. Проверка обложки
     if (coverUrl.isNotEmpty && !_isValidUrl(coverUrl)) {
       AppNotification.show(
         context,
@@ -153,7 +145,6 @@ class _ImportScreenState extends State<ImportScreen> {
       return;
     }
 
-    // Сохранение
     final newArtwork = ArtworkModel(
       title: title,
       description: _descController.text.trim(),
@@ -265,7 +256,7 @@ class _ImportScreenState extends State<ImportScreen> {
                 labelText: 'Дата начала создания',
                 hintText: 'ДД.ММ.ГГГГ',
                 inputFormatter: '##.##.####',
-                keyboardType: TextInputType.number, // Удобно для цифр
+                keyboardType: TextInputType.number,
                 controller: _dateStartController,
               ),
               const SizedBox(height: verticalGap),
@@ -306,7 +297,6 @@ class _ImportScreenState extends State<ImportScreen> {
                 controller: _coverController,
               ),
 
-              // --- Предпросмотр ---
               AnimatedSize(
                 duration: const Duration(milliseconds: 300),
                 child: currentCoverUrl.isNotEmpty
@@ -349,7 +339,6 @@ class _ImportScreenState extends State<ImportScreen> {
                     : const SizedBox.shrink(),
               ),
 
-              // -------------------
               const SizedBox(height: 24),
               const Divider(
                 color: AppColors.divider,

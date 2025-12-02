@@ -43,13 +43,11 @@ class _ExportScreenState extends State<ExportScreen> {
     super.dispose();
   }
 
-  // Проверка формата через Regex
   bool _isFormatValid(String date) {
     final regex = RegExp(r'^\d{2}\.\d{2}\.\d{4}$');
     return regex.hasMatch(date);
   }
 
-  // Строгий парсинг даты
   DateTime? _parseDateStrict(String dateStr) {
     if (!_isFormatValid(dateStr)) return null;
 
@@ -61,7 +59,6 @@ class _ExportScreenState extends State<ExportScreen> {
 
       final date = DateTime(year, month, day);
 
-      // Проверка на календарную корректность (например, 30 февраля)
       if (date.year == year && date.month == month && date.day == day) {
         return date;
       }
@@ -84,14 +81,12 @@ class _ExportScreenState extends State<ExportScreen> {
     if (exportAll) {
       filteredList = List.from(allArtworks);
     } else {
-      // --- Блок валидации ---
       final startStr = _dateStartController.text.trim();
       final endStr = _dateEndController.text.trim();
 
       DateTime? filterStart;
       DateTime? filterEnd;
 
-      // 1. Проверяем дату начала, только если она введена
       if (startStr.isNotEmpty) {
         filterStart = _parseDateStrict(startStr);
         if (filterStart == null) {
@@ -103,7 +98,6 @@ class _ExportScreenState extends State<ExportScreen> {
         }
       }
 
-      // 2. Проверяем дату конца, только если она введена
       if (endStr.isNotEmpty) {
         filterEnd = _parseDateStrict(endStr);
         if (filterEnd == null) {
@@ -115,7 +109,6 @@ class _ExportScreenState extends State<ExportScreen> {
         }
       }
 
-      // 3. Проверяем логику: Начало <= Конец
       if (filterStart != null && filterEnd != null) {
         if (filterStart.isAfter(filterEnd)) {
           AppNotification.show(
@@ -125,22 +118,16 @@ class _ExportScreenState extends State<ExportScreen> {
           return;
         }
       }
-      // ---------------------
 
       final String genreFilter = _selectedGenre ?? 'all';
 
       filteredList = allArtworks.where((item) {
-        // Фильтр по жанру
         if (genreFilter != 'all' && item.genre != genreFilter) {
           return false;
         }
 
-        // Фильтр по дате
-        // Сначала парсим дату самого произведения
         final itemDate = _parseDateStrict(item.yearStart);
 
-        // Если у произведения дата некорректна, решаем, включать ли его.
-        // Обычно, если мы фильтруем по датам, произведения без дат или с битыми датами исключаются.
         if (itemDate != null) {
           if (filterStart != null && itemDate.isBefore(filterStart)) {
             return false;
@@ -149,7 +136,6 @@ class _ExportScreenState extends State<ExportScreen> {
             return false;
           }
         } else {
-          // Если фильтры дат установлены, а у произведения даты нет - исключаем его
           if (filterStart != null || filterEnd != null) {
             return false;
           }
@@ -203,8 +189,7 @@ class _ExportScreenState extends State<ExportScreen> {
     const double verticalGap = 16.0;
 
     return Scaffold(
-      backgroundColor:
-          AppColors.screenBackground, // Убедитесь, что цвет фона задан
+      backgroundColor: AppColors.screenBackground,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
